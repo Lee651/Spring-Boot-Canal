@@ -15,6 +15,12 @@ spring:
       pool:
         max-idle: 8
         min-idle: 2
+  rabbitmq:
+    addresses: localhost
+    port: 5672
+    username: guest
+    password: guest
+    publisher-confirm-type: correlated
 
 canal:
   client:

@@ -1,16 +1,17 @@
 package top.rectorlee.config;
 
-import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.xpand.starter.canal.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import top.rectorlee.constant.SystemConstant;
 import top.rectorlee.entity.User;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Lee
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @CanalEventListener
 public class CanalDataEventListener {
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     // 监听增加数据
     @InsertListenPoint
@@ -34,10 +35,8 @@ public class CanalDataEventListener {
         User user = User.builder().id(id).name(name).nickName(nickName).build();
         log.info("新增数据为: {}", user);
 
-        String redisKey = "userNo:" + id;
-        String redisValue = JSONObject.toJSONString(user);
-        redisTemplate.opsForValue().set(redisKey, redisValue);
-        log.info("redis add key: {}, value: {}",  redisKey, redisValue);
+        // rabbitMQ 发送消息
+        sendMessage(id, user, SystemConstant.MESSAGE_TYPE_INSERT);
     }
 
     // 监听修改数据
@@ -59,10 +58,8 @@ public class CanalDataEventListener {
         User newUser = User.builder().id(id).name(newName).nickName(newNickName).build();
         log.info("修改后的数据为: {}", newUser);
 
-        String redisKey = "userNo:" + id;
-        String redisValue = JSONObject.toJSONString(newUser);
-        redisTemplate.opsForValue().set(redisKey, redisValue);
-        log.info("redis update key: {}, value: {}", redisKey, redisValue);
+        // rabbitMQ 发送消息
+        sendMessage(id, newUser, SystemConstant.MESSAGE_TYPE_UPDATE);
     }
 
     // 监听删除数据
@@ -75,9 +72,25 @@ public class CanalDataEventListener {
         User user = User.builder().id(id).name(name).nickName(nickName).build();
         log.info("删除前的数据为: {}", user);
 
-        String redisKey = "userNo:" + id;
-        String redisValue = JSONObject.toJSONString(user);
-        redisTemplate.opsForValue().set(redisKey, redisValue, RandomUtil.randomInt(1, 5), TimeUnit.SECONDS);
-        log.info("redis delete key: {}, value: {}",  redisKey, redisValue);
+        // rabbitMQ 发送消息
+        sendMessage(id, user,  SystemConstant.MESSAGE_TYPE_DELETE);
+    }
+
+    private void sendMessage(int id, User user, int type) {
+        CorrelationData correlationData = new CorrelationData();
+        correlationData.setId(SystemConstant.REDIS_KEY_PREFIX + id);
+        String msg = JSONObject.toJSONString(user);
+        // 消息持久化
+        MessageProperties messageProperties = MessagePropertiesBuilder.newInstance().setDeliveryMode(MessageDeliveryMode.PERSISTENT).build();
+        org.springframework.amqp.core.Message mqMessage = new org.springframework.amqp.core.Message(msg.getBytes(), messageProperties);
+        if (SystemConstant.MESSAGE_TYPE_INSERT == type) {
+            rabbitTemplate.send(SystemConstant.EXCHANGE_NAME_INSERT, SystemConstant.ROUTING_KEY_INSERT, mqMessage, correlationData);
+        } else if (SystemConstant.MESSAGE_TYPE_UPDATE == type) {
+            rabbitTemplate.send(SystemConstant.EXCHANGE_NAME_UPDATE, SystemConstant.ROUTING_KEY_UPDATE, mqMessage, correlationData);
+        } else {
+            rabbitTemplate.send(SystemConstant.EXCHANGE_NAME_DELETE, SystemConstant.ROUTING_KEY_DELETE, mqMessage, correlationData);
+        }
+
+        log.info("发送消息 {} 到MQ中", msg);
     }
 }

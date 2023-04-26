@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import top.rectorlee.constant.SystemConstant;
 import top.rectorlee.entity.User;
 import top.rectorlee.mapper.UserMapper;
 import top.rectorlee.service.UserService;
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUser(Integer id) {
-        String redisKey = "userNo:" + id;
+        String redisKey = SystemConstant.REDIS_KEY_PREFIX + id;
         String redisValue = (String) redisTemplate.opsForValue().get(redisKey);
         if (redisValue == null) {
             User user= userMapper.findUser(id);
