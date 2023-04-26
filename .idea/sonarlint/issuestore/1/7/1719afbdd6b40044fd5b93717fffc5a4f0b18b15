@@ -1,0 +1,19 @@
+
+L
+java:S3740"/Provide the parametrized type for this generic.(‚Ê«8ùÄ¤åû0
+d
+java:S1192%"HDefine a constant instead of duplicating this literal "userNo:" 3 times.(×é—8ó†´åû0
+[
+java:S2130"9Use "Integer.parseInt" for this string-to-int conversion.(«•Âºşÿÿÿÿ8Å’€äû0
+h
+java:S3252&"FUse static access with "com.alibaba.fastjson.JSON" for "toJSONString".(³ÁáÜûÿÿÿÿ8È’€äû0
+V
+java:S21300"9Use "Integer.parseInt" for this string-to-int conversion.(ËÛ8Ë’€äû0
+[
+java:S21308"9Use "Integer.parseInt" for this string-to-int conversion.(«•Âºşÿÿÿÿ8Î’€äû0
+h
+java:S3252?"FUse static access with "com.alibaba.fastjson.JSON" for "toJSONString".(¯©Ÿ›üÿÿÿÿ8Ñ’€äû0
+[
+java:S2130H"9Use "Integer.parseInt" for this string-to-int conversion.(«•Âºşÿÿÿÿ8Ó’€äû0
+h
+java:S3252O"FUse static access with "com.alibaba.fastjson.JSON" for "toJSONString".(³ÁáÜûÿÿÿÿ8Ö’€äû0

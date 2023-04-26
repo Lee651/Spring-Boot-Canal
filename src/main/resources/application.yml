@@ -1,0 +1,24 @@
+server:
+  port: 9999
+
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mydatabase?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: li123456
+  redis:
+    host: localhost
+    port: 6379
+    password: li123456
+    lettuce:
+      pool:
+        max-idle: 8
+        min-idle: 2
+
+canal:
+  client:
+    instances:
+      example:
+        host: 127.0.0.1
+        port: 11111
